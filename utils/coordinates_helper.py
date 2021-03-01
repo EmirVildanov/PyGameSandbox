@@ -1,18 +1,14 @@
 from attributes.constants import *
 from objects.bullet import Bullet
-from src.intersect_coordinator import is_segment_intersect_rect
+from utils.intersect_coordinator import is_segment_intersect_rect
 
 
-def get_rectangle_coordinates(x, y, width, height):
+def rect_coordinates_from_wh(x, y, width, height):
     return [(x, y), (x + width, y), (x + width, y + height), (x, y + height)]
 
 
-def find_button_coordinates(button_x, buttons_y, button_width, button_height):
-    p1 = (button_x, buttons_y)
-    p2 = (button_x + button_width, buttons_y)
-    p3 = (button_x + button_width, buttons_y + button_height)
-    p4 = (button_x, buttons_y + button_height)
-    return [p1, p2, p3, p4]
+def rect_coordinates(rect: pygame.Rect):
+    return [rect.topleft, rect.topright, rect.bottomright, rect.bottomleft]
 
 
 def is_outside_screen(object):
@@ -37,3 +33,28 @@ def is_bullet_collide_collider(bullet: Bullet) -> bool:
         bullet.rect.x + bullet.move_x, bullet.rect.y + bullet.move_y), collider.rect):
             return True
     return False
+
+
+def line_intersection(line1, line2):
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+       return None
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return x, y
+
+
+def line_rect_intersection(line, rect_coordinates):
+    for i in range(4):
+        current_intersection = line_intersection(line, (rect_coordinates[i], rect_coordinates[(i + 1) % 4]))
+        if current_intersection is not None:
+            return current_intersection
+    return None

@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt, cos, sin, radians
 
 import pygame, pygame.mixer
 
@@ -8,7 +8,7 @@ from attributes.constants import *
 from src.game_state import GameState
 from objects.player import Player, FIRST_LOCATION_BACKGROUND
 from utils.coordinates_helper import is_outside_screen, is_collide_collider, \
-    is_bullet_collide_collider
+    is_bullet_collide_collider, line_intersection, line_rect_intersection, rect_coordinates_from_wh, rect_coordinates
 from utils.event_handling import is_movement_event_key
 from utils.yaml_worker import initialize_colliders
 
@@ -35,40 +35,74 @@ class Game:
         self.clock = clock
         self.screen, self.background, self.background_box = screen, background, background_box
         self.state = GameState.MENU
+        self.level_index = 2
         self.clickable_objects = set()
         self.hoverable_objects = set()
         self.bullets = pygame.sprite.Group()
 
     def start(self):
+        A = (0, 3)
+        B = (0, 10)
+        C = (3, 0)
+        D = (5, 0)
+        print(line_intersection((A, B), (C, D)))
         while self.state == GameState.MENU:
-            for event in pygame.event.get():
-                self.handle_event(event)
-            self.player.update()
-            self.camera.update(self.player)
-            self.screen.blit(self.background, (-self.camera.rect.x, -self.camera.rect.y))
-            for bullet in self.bullet_list:
-                bullet.update()
-                if is_bullet_collide_collider(bullet):
-                    BULLET_METAL_HIT_SOUND.play()
-                    self.bullet_list.remove(bullet)
-                if is_outside_screen(bullet):
-                    self.bullet_list.remove(bullet)
-            self.screen.blit(self.player.image, self.camera.apply(self.player))
+            if self.level_index == 1:
+                self.handle_level_1()
+            elif self.level_index == 2:
+                self.handle_level_2()
 
-            self.bullet_list.draw(self.screen)
+    def handle_level_1(self):
+        for event in pygame.event.get():
+            self.handle_event(event)
+        self.player.update()
+        self.camera.update(self.player)
+        self.screen.blit(self.background, (-self.camera.rect.x, -self.camera.rect.y))
+        for bullet in self.bullet_list:
+            bullet.update()
+            if is_bullet_collide_collider(bullet):
+                BULLET_METAL_HIT_SOUND.play()
+                self.bullet_list.remove(bullet)
+            if is_outside_screen(bullet):
+                self.bullet_list.remove(bullet)
+        self.screen.blit(self.player.image, self.camera.apply(self.player))
+        self.bullet_list.draw(self.screen)
+        pygame.draw.line(self.screen, BLACK, self.camera.apply(self.player).center, pygame.mouse.get_pos())
+        pygame.display.update()
+        self.clock.tick(FPS)
 
-            pygame.draw.line(self.screen, BLACK, self.camera.apply(self.player).center, pygame.mouse.get_pos())
-            pygame.display.update()
-            self.clock.tick(FPS)
-        while self.state != GameState.FINISHED:
-            while self.state == GameState.PAUSED:
-                for event in pygame.event.get():
-                    self.handle_event(event)
-                pygame.display.update()
-                self.clock.tick(FPS)
-            for event in pygame.event.get():
-                self.handle_event(event)
-            pygame.display.update()
+    def handle_level_2(self):
+        for event in pygame.event.get():
+            self.handle_event(event)
+        self.player.update()
+        self.screen.fill(WHITE)
+        self.bullet_list.draw(self.screen)
+        for collider in self.colliders_list:
+            pygame.draw.rect(self.screen, BLACK, collider.rect)
+        self.screen.blit(self.player.image, self.player.rect)
+
+        print("Turn")
+        is_drawn = False
+        for i in range(0, 361, 40):
+            radar = self.player.rect.center
+            radar_len = 2000
+            x = radar[0] + cos(radians(i)) * radar_len
+            y = radar[1] + sin(radians(i)) * radar_len
+            line = (self.player.rect.center, (x, y))
+            intersection_point = line_intersection(line, ((0, 0), (CAMERA_WIDTH, 0)))
+            # pygame.draw.circle(self.screen, RED, intersaction_point, 1)
+            collider_intersection_point = line_rect_intersection(line, rect_coordinates(self.colliders_list[0].rect))
+            if collider_intersection_point is not None and not is_drawn:
+                # pygame.draw.circle(self.screen, RED, collider_intersection_point, 1)
+                is_drawn = False
+                print(f"Collider: {collider_intersection_point}")
+                # print(intersection_point)
+                pygame.draw.line(self.screen, pygame.Color("black"), radar, collider_intersection_point)
+            else:
+                pygame.draw.line(self.screen, pygame.Color("black"), radar, (x, y))
+        # pygame.draw.line(self.screen, BLACK, self.player.rect.center, pygame.mouse.get_pos())
+        pygame.display.update()
+        self.clock.tick(FPS)
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.QUIT:
