@@ -1,0 +1,25 @@
+- collider:
+    height: 106
+    width: 150
+    x: 121
+    y: 430
+- collider:
+    height: 268
+    width: 230
+    x: 37
+    y: 505
+- collider:
+    height: 322
+    width: 644
+    x: 34
+    y: 844
+- collider:
+    height: 178
+    width: 260
+    x: 692
+    y: 988
+- collider:
+    height: 323
+    width: 599
+    x: 968
+    y: 839
