@@ -10,16 +10,14 @@ from utils.yaml_worker import save_yaml_file, initialize_colliders
 
 class Editor:
 
-    def __init__(self, screen: pygame.Surface, level_index: int):
+    def __init__(self, level_index: int):
         self.level_index = level_index
         self.level_name = f"level{self.level_index}"
-        self.screen = screen
+        self.screen = pygame.display.set_mode((FIRST_LOCATION_WIDTH, FIRST_LOCATION_WIDTH))
         self.running = True
         self.chosen_first_rect_button_pos = None
         self.state = EditorOption.RECT_DRAWING
         self.colliders = initialize_colliders()
-        print(self.colliders)
-        print(self.colliders[0].rect)
 
     def start(self):
         while self.running:

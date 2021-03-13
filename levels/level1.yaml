@@ -4,22 +4,52 @@
     x: 121
     y: 430
 - collider:
-    height: 268
-    width: 230
-    x: 37
-    y: 505
+    height: 110
+    width: 138
+    x: 179
+    y: 630
 - collider:
-    height: 322
-    width: 644
-    x: 34
-    y: 844
+    height: 70
+    width: 126
+    x: 388
+    y: 417
 - collider:
-    height: 178
-    width: 260
-    x: 692
-    y: 988
+    height: 50
+    width: 93
+    x: 701
+    y: 406
 - collider:
-    height: 323
-    width: 599
-    x: 968
-    y: 839
+    height: 72
+    width: 111
+    x: 911
+    y: 437
+- collider:
+    height: 176
+    width: 110
+    x: 1092
+    y: 612
+- collider:
+    height: 97
+    width: 126
+    x: 382
+    y: 798
+- collider:
+    height: 87
+    width: 90
+    x: 517
+    y: 588
+- collider:
+    height: 434
+    width: 52
+    x: 562
+    y: 685
+- collider:
+    height: 3
+    width: 334
+    x: 294
+    y: 499
+- collider:
+    height: 3
+    width: 341
+    x: 292
+    y: 577

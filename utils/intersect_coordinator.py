@@ -3,7 +3,8 @@
 
 # Define Infinite (Using INT_MAX
 # caused overflow problems)
-from typing import Tuple
+from sympy.geometry import *
+from typing import Optional, Tuple
 
 import pygame
 
@@ -46,7 +47,7 @@ def orientation(p: tuple, q: tuple, r: tuple) -> int:
         return 2  # Clock or counterclock
 
 
-def do_intersect(p1, q1, p2, q2):
+def do_intersect(p1, q1, p2, q2) -> bool:
     """
     Function that returns true if
     the line segment 'p1q1' and 'p2q2' intersect.
@@ -138,3 +139,35 @@ def is_segment_intersect_rect(point1, point2, rect: pygame.Rect):
     elif do_intersect(point1, point2, rect.topright, rect.bottomright):
         return True
     return False
+
+
+def get_segment_intersection(point11: Tuple[float, float], point12: Tuple[float, float],
+                             point21: Tuple[float, float], point22: Tuple[float, float]) -> Optional[
+    Tuple[float, float]]:
+    seg1_x_diff = point12[0] - point11[0]
+    seg1_y_diff = point12[1] - point11[1]
+    seg2_x_diff = point22[0] - point21[0]
+    seg2_y_diff = point22[1] - point21[1]
+
+    try:
+        s = (-seg1_y_diff * (point11[0] - point21[0]) + seg1_x_diff * (point11[1] - point21[1])) / (
+                -seg2_x_diff * seg1_y_diff + seg1_x_diff * seg2_y_diff)
+        t = (seg2_x_diff * (point11[1] - point21[1]) - seg2_y_diff * (point11[0] - point21[0])) / (
+                -seg2_x_diff * seg1_y_diff + seg1_x_diff * seg2_y_diff)
+    except ZeroDivisionError:
+        return None
+
+    if 0 <= s <= 1 and 0 <= t <= 1:
+        # Collision detected
+        return point11[0] + (t * seg1_x_diff), point11[1] + (t * seg1_y_diff)
+
+    return None  # No collision
+
+
+def get_segment_circle_intersection(segment: Tuple[Tuple[float, float], Tuple[float, float]],
+                                    center: Tuple[float, float], radius: float):
+    circle = Circle(Point(center[0], center[1]), radius)
+    segment = Line(Point(segment[0][0], segment[0][1]), Point(segment[1][0], segment[1][1]))
+    intersection_point = intersection(circle, segment)
+    print(f"Returning: {intersection_point[0].x, intersection_point[0].y}")
+    return (intersection_point[0].x, intersection_point[0].y)

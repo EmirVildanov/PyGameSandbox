@@ -10,11 +10,16 @@ APP_FONT = 'Comic Sans MS'
 CAMERA_WIDTH = 1000
 CAMERA_HEIGHT = 800
 FPS = 60
-ONE_STEP_IN_PX = 10
+ONE_STEP_IN_PX = 6
 BULLET_STEP_IN_PX = 1
 BULLET_SPEED = 100
 
-ALPHA = (255, 255, 255)
+BIG_NUMBER = 5000
+RADAR_LENGTH = 2000
+VISIBLE_AREA_RADIUS = 100
+
+ALPHA_WHITE = (255, 255, 255)
+ALPHA_STRANGE_WHITE = (242, 242, 242)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
@@ -29,7 +34,6 @@ SOUND_FOLDER = "sound"
 PLAYER_SPRITES_FOLDER = os.path.join(SPRITES_FOLDER, "Player")
 BACKGROUND_SPRITES_FOLDER = os.path.join(SPRITES_FOLDER, "Background")
 
-
 SNOW_WALK_SOUND = pygame.mixer.Sound(os.path.join(APP_FOLDER, SOUND_FOLDER, "walk_snow.wav"))
 PISTOL_SHOT_SOUND = pygame.mixer.Sound(os.path.join(APP_FOLDER, SOUND_FOLDER, "gun_shot.wav"))
 BULLET_SHELL_SOUND = pygame.mixer.Sound(os.path.join(APP_FOLDER, SOUND_FOLDER, "gun_shot_ground_fall.wav"))
@@ -37,3 +41,4 @@ BULLET_METAL_HIT_SOUND = pygame.mixer.Sound(os.path.join(APP_FOLDER, SOUND_FOLDE
 
 GAME_IMAGE = pygame.image.load(os.path.join(APP_FOLDER, SPRITES_FOLDER, "shooter.png"))
 PLAYER_IMAGE = pygame.image.load(os.path.join(APP_FOLDER, PLAYER_SPRITES_FOLDER, "circle.png"))
+PLAYER_KNIFE_IMAGE = pygame.image.load(os.path.join(APP_FOLDER, PLAYER_SPRITES_FOLDER, "knife_hand.png"))

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import pygame
 from pygame import Rect
 
@@ -35,6 +37,12 @@ class Camera(object):
 
     def apply(self, target) -> pygame.Rect:
         return target.rect.move(-self.rect.x, -self.rect.y)
+
+    def apply_rect(self, target: pygame.Rect):
+        return target.move(-self.rect.x, -self.rect.y)
+
+    def apply_point(self, target: Tuple[float, float]):
+        return target[0] - self.rect.x, target[1] - self.rect.y
 
     def update(self, target):
         self.rect = camera_configure(target.rect)
