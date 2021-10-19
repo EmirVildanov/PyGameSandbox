@@ -53,3 +53,8 @@
     width: 341
     x: 292
     y: 577
+- collider:
+    height: 117
+    width: 147
+    x: 815
+    y: 826

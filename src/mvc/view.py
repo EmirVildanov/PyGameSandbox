@@ -1,28 +1,35 @@
-from math import cos, radians, sin, ceil
+from math import cos, radians, sin
 from typing import Tuple
+from pygame import gfxdraw
 
-from attributes.constants import *
-from attributes.locations import FIRST_LOCATION_WIDTH, FIRST_LOCATION_HEIGHT
-from utils.coordinates_helper import is_bullet_collide_collider, is_outside_screen, get_rect_coordinates, \
+from src.constants.main_constants import *
+from src.constants.locations_constants import FIRST_LOCATION_WIDTH, FIRST_LOCATION_HEIGHT
+from src.constants.raytracing_constants import RAY_TRACING_CAMERA_WIDTH, RAY_TRACING_CAMERA_HEIGHT
+from src.game_type import GameType
+from src.raycasting.plt_raytracing import get_image, draw_image
+from src.utils.coordinates_helper import is_bullet_collide_collider, is_outside_screen, get_rect_coordinates, \
     segment_rect_intersection, find_nearest_point, find_distance_between_points
-from utils.intersect_coordinator import get_segment_circle_intersection
 
 
 class PygameView:
-    # НАДО ПЕРЕДАТЬ screen ОТ Game К PygameView
-    def __init__(self, game):
+    def __init__(self, game, screen):
         super().__init__()
         self.game = game
+        self.screen = screen
 
     def notify(self):
-        if self.game.level_index == 1:
-            self.draw_level_1()
-        elif self.game.level_index == 2:
-            self.draw_level_2()
-        elif self.game.level_index == 3:
-            self.draw_level_3()
+        if self.game.game_type == GameType.TOP_DOWN_BACKGROUND:
+            self.draw_top_down_level_with_background()
+        elif self.game.game_type == GameType.TOP_DOWN_LIGHT:
+            self.draw_top_down_level_with_light()
+        elif self.game.game_type == GameType.TOP_DOWN_LIGHT_WITH_MOUSE_CONTROL:
+            self.draw_top_down_level_with_light_and_mouse_control()
+        elif self.game.game_type == GameType.RAY_CASTING:
+            self.draw_ray_casting_level()
+        elif self.game.game_type == GameType.RAY_TRACING:
+            self.draw_ray_tracing_level()
 
-    def draw_level_1(self):
+    def draw_top_down_level_with_background(self):
         self.game.player.update()
         self.game.camera.update(self.game.player)
         self.game.screen.blit(self.game.background, (-self.game.camera.rect.x, -self.game.camera.rect.y))
@@ -39,14 +46,15 @@ class PygameView:
                          pygame.mouse.get_pos())
         pygame.display.update()
 
-    def draw_level_2(self):
+    # look here for lightning:
+    # https://stackoverflow.com/questions/31038285/python-pygame-game-lighting
+    def draw_top_down_level_with_light(self):
         self.game.player.update()
         self.game.camera.update(self.game.player)
         self.game.screen.fill(BLACK)
         radar = self.game.player.rect.center
         screen_rectangle = pygame.Rect(0, 0, FIRST_LOCATION_WIDTH, FIRST_LOCATION_HEIGHT)
         radar_intersection_points = self.get_radar_intersection_points(radar, screen_rectangle)
-        # screen_rectangle = self.game.screen.get_rect()
         for i, point in enumerate(radar_intersection_points):
             next_point = radar_intersection_points[(i + 1) % len(radar_intersection_points)]
             point = self.game.camera.apply_point(point)
@@ -93,10 +101,30 @@ class PygameView:
             #     pygame.draw.line(self.game.screen, RED, radar, (x, y))
         return radar_intersection_points
 
-    def draw_level_3(self):
+    def draw_top_down_level_with_light_and_mouse_control(self):
         self.game.player.update()
         self.game.camera.update(self.game.player)
-        # self.game.screen.fill(WHITE)
+        self.game.screen.fill(BLACK)
+        radar = self.game.player.rect.center
+        screen_rectangle = self.game.screen.get_rect()
+        radar_intersection_points_pairs, middle_point = self.get_radar_intersection_pairs(radar, screen_rectangle)
+        radar_intersection_points = list(radar_intersection_points_pairs.keys())
+
+        self.draw_visible_circle(radar, radar_intersection_points, middle_point)
+        pygame.display.update()
+
+    def draw_visible_circle(self, radar, radar_intersection_points, middle_point):
+        for i, point in enumerate(radar_intersection_points):
+            next_point = radar_intersection_points[(i + 1) % len(radar_intersection_points)]
+            pygame.draw.polygon(self.game.screen, WHITE, [point, radar, next_point], width=0)
+        for collider in self.game.colliders_list:
+            pygame.draw.rect(self.game.screen, BLACK, collider.rect)
+        pygame.draw.line(self.game.screen, BLACK, self.game.player.rect.center, middle_point)
+        self.game.screen.blit(self.game.player.image, self.game.player)
+
+    def draw_ray_casting_level(self):
+        self.game.player.update()
+        self.game.camera.update(self.game.player)
         self.game.screen.fill(WHITE, (0, 0, CAMERA_WIDTH, CAMERA_HEIGHT / 2))
         self.game.screen.fill(GREEN, (0, CAMERA_HEIGHT / 2, CAMERA_WIDTH, CAMERA_HEIGHT / 2))
         radar = self.game.player.rect.center
@@ -105,7 +133,6 @@ class PygameView:
         radar_intersection_points = list(radar_intersection_points_pairs.keys())
 
         self.draw_visible_walls(radar, radar_intersection_points, radar_intersection_points_pairs, middle_point)
-        # self.draw_visible_circle(radar, radar_intersection_points, middle_point)
         pygame.display.update()
 
     def draw_visible_walls(self, radar, radar_intersection_points, radar_intersection_points_pairs, middle_point):
@@ -135,7 +162,7 @@ class PygameView:
         # exit(1)
 
     def draw_player_hand(self):
-        cadr = self.game.player.cadr / 100
+        cadr = self.game.player.frame_counter / 100
         bob_x = cos(cadr * 2) * 3 * 6
         bob_y = sin(cadr * 4) * 3 * 6
         # bob_x = 1
@@ -144,23 +171,8 @@ class PygameView:
         top = CAMERA_HEIGHT * 0.65 + bob_y
         self.game.screen.blit(self.game.player.knife_image, (left, top))
 
-    def draw_visible_circle(self, radar, radar_intersection_points, middle_point):
-        for i, point in enumerate(radar_intersection_points):
-            next_point = radar_intersection_points[(i + 1) % len(radar_intersection_points)]
-            pygame.draw.polygon(self.game.screen, WHITE, [point, radar, next_point], width=0)
-        for collider in self.game.colliders_list:
-            pygame.draw.rect(self.game.screen, BLACK, collider.rect)
-        pygame.draw.line(self.game.screen, BLACK, self.game.player.rect.center, middle_point)
-        self.game.screen.blit(self.game.player.image, self.game.player)
-        player_rect = self.game.player.rect
-        arc_rect = pygame.Rect(player_rect.topleft[0] - 10, player_rect.topleft[1] - 10, 20 + player_rect.width, 20 + player_rect.height)
-        arc_start_angle = self.game.first_person_mouse_angle
-        arc_finish_angle = self.game.first_person_mouse_angle + 180
-        pygame.draw.arc(self.game.screen, BLUE, arc_rect, -radians(arc_start_angle), -radians(arc_finish_angle), width=1)
-
     def get_radar_intersection_pairs(self, radar, screen_rectangle) -> Tuple[dict, Tuple[float, float]]:
         radar_intersection_pairs = {}
-        angle_range = range(self.game.first_person_mouse_angle - 180, self.game.first_person_mouse_angle + 1)
         angle_range = range(self.game.first_person_mouse_angle - 180 + 45, self.game.first_person_mouse_angle - 45 + 1)
         for i in angle_range:
             line_point = (radar[0] + cos(radians(i)) * RADAR_LENGTH, radar[1] + sin(radians(i)) * RADAR_LENGTH)
@@ -193,3 +205,11 @@ class PygameView:
             # radar_intersection_pairs.update({best_point: best_point_distance})
         return radar_intersection_pairs, middle_point
 
+    def draw_ray_tracing_level(self):
+        self.game.player.update()
+        self.game.camera.update(self.game.player)
+        self.screen.fill(WHITE, (0, 0, CAMERA_WIDTH, CAMERA_HEIGHT / 2))
+        self.screen.fill(GREEN, (0, CAMERA_HEIGHT / 2, CAMERA_WIDTH, CAMERA_HEIGHT / 2))
+        # image = get_image(RAY_TRACING_CAMERA_WIDTH, RAY_TRACING_CAMERA_HEIGHT, 3)
+        draw_image(self.screen, self.game.first_person_mouse_angle, RAY_TRACING_CAMERA_WIDTH, RAY_TRACING_CAMERA_HEIGHT)
+        pygame.display.update()

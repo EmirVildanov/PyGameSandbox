@@ -1,5 +1,5 @@
 import pygame.freetype
-from game import Game
+from src.game import Game
 
 
 if __name__ == '__main__':

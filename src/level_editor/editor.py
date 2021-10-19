@@ -1,11 +1,10 @@
-import pygame
 import pygame.freetype
 
-from attributes.constants import *
-from attributes.locations import *
-from level_editor.editor_option import EditorOption
-from objects.collider import Collider
-from utils.yaml_worker import save_yaml_file, initialize_colliders
+from src.constants.main_constants import *
+from src.constants.locations_constants import *
+from src.level_editor.editor_option import EditorOption
+from src.objects.collider import Collider
+from src.utils.yaml_worker import save_yaml_file, initialize_colliders
 
 
 class Editor:

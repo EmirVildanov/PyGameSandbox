@@ -1,10 +1,9 @@
 from typing import Tuple
 
-import pygame
 from pygame import Rect
 
-from attributes.locations import FIRST_LOCATION_WIDTH, FIRST_LOCATION_HEIGHT
-from attributes.constants import *
+from src.constants.locations_constants import FIRST_LOCATION_WIDTH, FIRST_LOCATION_HEIGHT
+from src.constants.main_constants import *
 
 
 def camera_configure(target_rect: pygame.Rect):

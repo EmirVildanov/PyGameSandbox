@@ -1,8 +1,7 @@
-import pygame
 import yaml
-from yaml import load, dump
+from yaml import load
 
-from objects.collider import Collider
+from src.objects.collider import Collider
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper

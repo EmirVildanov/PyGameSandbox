@@ -2,7 +2,7 @@ import os
 
 import pygame
 
-from attributes.constants import BACKGROUND_SPRITES_FOLDER
+from src.constants.main_constants import BACKGROUND_SPRITES_FOLDER
 
 FIRST_LOCATION_WIDTH = 1600
 FIRST_LOCATION_HEIGHT = 1200

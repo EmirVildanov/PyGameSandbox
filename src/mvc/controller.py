@@ -1,8 +1,8 @@
-import pygame
-
-from attributes.constants import *
-from mvc.view import PygameView
-from mvc.event import EventManager, Event, TickEvent, QuitEvent
+from src.constants.main_constants import *
+from src.constants.raytracing_constants import RAY_TRACING_FPS
+from src.game_type import GameType
+from src.mvc.view import PygameView
+from src.mvc.event import EventManager, Event, TickEvent, QuitEvent
 
 
 class Controller:
@@ -88,18 +88,22 @@ class MouseController(Controller):
 
     def handle_mouse_motion_event(self, event: Event):
         pygame_event = event.pygame_event
-        print(f"FPAngle :{self.game.first_person_mouse_angle}")
-        if self.game.level_index == 3:
-            sensivity = 4
+        print(f"First Person Angle :{self.game.first_person_mouse_angle}")
+        if self.game.game_type == GameType.RAY_CASTING\
+                or self.game.game_type == GameType.TOP_DOWN_LIGHT_WITH_MOUSE_CONTROL\
+                or self.game.game_type == GameType.RAY_TRACING:
+            sensitivity = 4
             if pygame_event.rel[0] < 0:
-                x_diff = -sensivity
+                x_diff = -sensitivity
             else:
-                x_diff = +sensivity
+                x_diff = +sensitivity
             current_position = (self.game.first_person_mouse_angle + x_diff) % 360
             self.game.first_person_mouse_angle = current_position
 
     def handle_mouse_down_event(self):
-        if self.game.level_index == 1:
+        if self.game.game_type == GameType.TOP_DOWN_BACKGROUND\
+                or self.game.game_type == GameType.TOP_DOWN_LIGHT\
+                or self.game.game_type == GameType.TOP_DOWN_LIGHT_WITH_MOUSE_CONTROL:
             self.game.shot_bullet()
 
 
@@ -120,7 +124,10 @@ class CPUSpinnerController(Controller):
                 self.game.check_collisions()
                 self.event_manager.post(TickEvent(event))
             self.view.notify()
-            self.clock.tick(FPS)
+            if self.game.game_type == GameType.RAY_TRACING:
+                self.clock.tick(RAY_TRACING_FPS)
+            else:
+                self.clock.tick(FPS)
 
     def notify(self, event: Event):
         if isinstance(event, QuitEvent):

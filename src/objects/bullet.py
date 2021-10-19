@@ -1,4 +1,4 @@
-from attributes.constants import *
+from src.constants.main_constants import *
 
 
 class Bullet(pygame.sprite.Sprite):

@@ -1,17 +1,13 @@
 from math import sqrt
 from typing import Tuple, Optional, List, Set
 
-from attributes.constants import *
-from objects.bullet import Bullet
-from utils.intersect_coordinator import is_segment_intersect_rect, get_segment_intersection
+from src.constants.main_constants import *
+from src.objects.bullet import Bullet
+from src.utils.intersect_coordinator import is_segment_intersect_rect, get_segment_intersection
 
 
 def find_distance_between_points(point1: Tuple[float, float], point2: Tuple[float, float]):
     return sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
-
-
-def rect_coordinates_from_wh(x, y, width, height):
-    return [(x, y), (x + width, y), (x + width, y + height), (x, y + height)]
 
 
 def get_rect_coordinates(rect: pygame.Rect):
@@ -43,11 +39,6 @@ def is_bullet_collide_collider(bullet: Bullet) -> bool:
 
 
 def line_intersection(line1, line2) -> Optional[Tuple[float, float]]:
-    """
-    :param line1: line1 coordinates Tuple
-    :param line2: line2 coordinates Tuple
-    :return: the point Tuple of intersection of None
-    """
     xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
     ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
 
@@ -62,14 +53,6 @@ def line_intersection(line1, line2) -> Optional[Tuple[float, float]]:
     x = det(d, xdiff) / div
     y = det(d, ydiff) / div
     return x, y
-
-
-def line_rect_intersection(line, rect_coordinates: Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float], Tuple[float, float]]):
-    for i in range(4):
-        current_intersection = line_intersection(line, (rect_coordinates[i], rect_coordinates[(i + 1) % 4]))
-        if current_intersection is not None:
-            return current_intersection
-    return None
 
 
 def segment_rect_intersection(segment, rect_coordinates) -> List[Tuple[float, float]]:
